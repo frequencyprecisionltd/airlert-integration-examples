@@ -1,0 +1,37 @@
+# React to AIRlert alerts in Home Assistant.
+# AIRlert LIVE calls a Home Assistant webhook; choose your own long, random webhook_id and give it to FP.
+# The alert fields shown are an example; FP confirms them for your project.
+
+- alias: "AIRlert: bed exit at night"
+  trigger:
+    - platform: webhook
+      webhook_id: "replace-with-a-long-random-id"
+      allowed_methods: [POST]
+      local_only: false
+  condition:
+    - condition: template
+      value_template: "{{ trigger.json.alert == 'bed_exit' }}"
+    - condition: time
+      after: "21:00:00"
+      before: "07:00:00"
+  action:
+    - service: light.turn_on
+      target:
+        entity_id: light.hallway
+      data:
+        brightness_pct: 30
+    - service: notify.notify
+      data:
+        message: "AIRlert: {{ trigger.json.sensor }} has left the bed"
+
+- alias: "AIRlert: convulsion alert"
+  trigger:
+    - platform: webhook
+      webhook_id: "replace-with-a-second-long-random-id"
+      allowed_methods: [POST]
+      local_only: false
+  action:
+    - service: notify.notify
+      data:
+        title: "AIRlert convulsion alert"
+        message: "{{ trigger.json.sensor }} at {{ trigger.json.time }}"
